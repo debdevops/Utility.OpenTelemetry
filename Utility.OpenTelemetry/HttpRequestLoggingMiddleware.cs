@@ -4,17 +4,35 @@ using System.Text;
 
 namespace Utility.OpenTelemetry
 {
+    /// <summary>
+    /// HTTP request logging
+    /// </summary>
     public class HttpRequestLoggingMiddleware
     {
+        /// <summary>
+        /// The next
+        /// </summary>
         private readonly RequestDelegate _next;
+        /// <summary>
+        /// The logger
+        /// </summary>
         private readonly ILogger<HttpRequestLoggingMiddleware> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpRequestLoggingMiddleware"/> class.
+        /// </summary>
+        /// <param name="next">The next.</param>
+        /// <param name="logger">The logger.</param>
         public HttpRequestLoggingMiddleware(RequestDelegate next, ILogger<HttpRequestLoggingMiddleware> logger)
         {
             _next = next;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Invokes the asynchronous.
+        /// </summary>
+        /// <param name="context">The context.</param>
         public async Task InvokeAsync(HttpContext context)
         {
             //Log request header
