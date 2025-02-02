@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35514.174 d17.12
+VisualStudioVersion = 17.12.35514.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utility.OpenTelemetry", "Utility.OpenTelemetry\Utility.OpenTelemetry.csproj", "{BE3757A3-9F10-4FDC-95FB-BB5D900DE69B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Test.Pkg.OpenTelemetry", "API.Test.Pkg.OpenTelemetry\API.Test.Pkg.OpenTelemetry.csproj", "{AE6E5039-A5BA-43E3-A5BF-BACE2379F322}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{BE3757A3-9F10-4FDC-95FB-BB5D900DE69B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE3757A3-9F10-4FDC-95FB-BB5D900DE69B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE3757A3-9F10-4FDC-95FB-BB5D900DE69B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE6E5039-A5BA-43E3-A5BF-BACE2379F322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE6E5039-A5BA-43E3-A5BF-BACE2379F322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE6E5039-A5BA-43E3-A5BF-BACE2379F322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE6E5039-A5BA-43E3-A5BF-BACE2379F322}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

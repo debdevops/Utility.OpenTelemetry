@@ -1,0 +1,6 @@
+@API.Test.Pkg.OpenTelemetry_HostAddress = http://localhost:5027
+
+GET {{API.Test.Pkg.OpenTelemetry_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
