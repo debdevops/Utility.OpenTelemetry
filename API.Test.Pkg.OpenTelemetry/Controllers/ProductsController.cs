@@ -86,5 +86,12 @@ namespace API.Test.Pkg.OpenTelemetry.Controllers
             _logger.LogInformation("Deleted product {Product}", removedProduct);
             return NoContent();
         }
+
+        [HttpGet("test-exception")]
+        public IActionResult TestException()
+        {
+            throw new Exception("This is a test exception for OpenTelemetry.");
+        }
+
     }
 }

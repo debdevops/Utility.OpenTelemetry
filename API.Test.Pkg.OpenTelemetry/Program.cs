@@ -20,9 +20,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-// Apply OpenTelemetry Middleware
-app.UseCustomOpenTelemetry();
-
+app.UseMiddleware<HttpRequestLoggingMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,30 +1,25 @@
-﻿using Azure.Monitor.OpenTelemetry.Exporter;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Logs;
+using Microsoft.Extensions.Configuration;
+using Azure.Monitor.OpenTelemetry.Exporter;
 
 namespace Utility.OpenTelemetry
 {
     /// <summary>
-    /// Open telemtry 
+    /// OpenTelemetry Configuration for logging, tracing, and metrics.
     /// </summary>
     public static class OpenTelemetryConfig
     {
-        /// <summary>Adds the custom open telemetry.</summary>
-        /// <param name="services">The services.</param>
-        /// <param name="configuration">The configuration.</param>
-        /// <returns>
-        ///   <br />
-        /// </returns>
-        /// <exception cref="System.InvalidOperationException">Azure Monitor connection string is missing in configuration.</exception>
+        /// <summary>
+        /// Configures OpenTelemetry for the application.
+        /// </summary>
         public static IServiceCollection AddCustomOpenTelemetry(this IServiceCollection services, IConfiguration configuration)
         {
-            var serviceName = configuration["OpenTelemetry:ServiceName"] ?? "UnknowsService";
+            var serviceName = configuration["OpenTelemetry:ServiceName"] ?? "UnknownService";
             var serviceVersion = configuration["OpenTelemetry:ServiceVersion"] ?? "1.0.0";
             var connectionString = configuration["OpenTelemetry:AzureMonitor:ConnectionString"];
 
@@ -33,63 +28,45 @@ namespace Utility.OpenTelemetry
                 throw new InvalidOperationException("Azure Monitor connection string is missing in configuration.");
             }
 
-            services.AddOpenTelemetry()
-                .WithTracing(tracing =>
-                {
-                    tracing
-                        .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                            .AddService(serviceName, serviceVersion))
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddAzureMonitorTraceExporter(o =>
-                        {
-                            o.ConnectionString = connectionString;
-                        });
-                })
-                .WithMetrics(metrics =>
-                {
-                    metrics
-                        .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                            .AddService(serviceName, serviceVersion))
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddAzureMonitorMetricExporter(o =>
-                        {
-                            o.ConnectionString = connectionString;
-                        });
-                });
+            // Configure OpenTelemetry resource with service name and version
+            services.Configure<OpenTelemetryLoggerOptions>(options =>
+            {
+                options.IncludeScopes = true; // Enables structured logging
+                options.IncludeFormattedMessage = true;
+                options.ParseStateValues = true;
+            });
 
-            // Add OpenTelemetry Logging
+            services.AddOpenTelemetry()
+                .ConfigureResource(resource => resource
+                    .AddService(serviceName: serviceName, serviceVersion: serviceVersion))
+                .WithTracing(tracing => tracing
+                    .AddAspNetCoreInstrumentation(options =>
+                    {
+                        options.RecordException = true;  // Capture exceptions
+                        options.Filter = (httpContext) => httpContext.Request.Path != "/health"; // Ignore health checks
+                    })
+                    .AddHttpClientInstrumentation()
+                    .AddConsoleExporter()  // Development only
+                    .AddAzureMonitorTraceExporter(o => o.ConnectionString = connectionString))
+                .WithMetrics(metrics => metrics
+                    .AddRuntimeInstrumentation() // ✅ Fix: Collects CPU, GC, ThreadPool
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddConsoleExporter());
+
             services.AddLogging(logging =>
             {
-                logging.ClearProviders();
                 logging.AddOpenTelemetry(options =>
                 {
-                    options.IncludeFormattedMessage = true; // Capture formatted messages
-                    options.ParseStateValues = true; // Ensure structured logs
-                    options.SetResourceBuilder(ResourceBuilder.CreateDefault()
-                        .AddService(serviceName, serviceVersion));
-
-                    options.AddConsoleExporter(); // For local debugging
-                    options.AddAzureMonitorLogExporter(o =>
-                    {
-                        o.ConnectionString = connectionString;
-                    });
+                    options.IncludeFormattedMessage = true;
+                    options.ParseStateValues = true;
+                    options.IncludeScopes = true;  // ✅ Ensure logs capture custom dimensions
+                    options.AddAzureMonitorLogExporter(o => o.ConnectionString = connectionString);
                 });
             });
 
-            return services;
-        }
 
-        /// <summary>
-        /// Uses the custom open telemetry.
-        /// </summary>
-        /// <param name="app">The application.</param>
-        /// <returns></returns>
-        public static IApplicationBuilder UseCustomOpenTelemetry(this IApplicationBuilder app)
-        {
-            app.UseMiddleware<HttpRequestLoggingMiddleware>(); // Add custom request logging middleware
-            return app;
+            return services;
         }
     }
 }
