@@ -20,7 +20,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseMiddleware<HttpRequestLoggingMiddleware>();
+//app.UseMiddleware<HttpRequestLoggingMiddleware>();
+app.UseMiddleware<HttpRequestLogMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
